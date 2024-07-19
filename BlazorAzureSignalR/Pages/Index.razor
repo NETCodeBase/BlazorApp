@@ -1,0 +1,41 @@
+﻿@page "/"
+
+<PageTitle>Live Data</PageTitle>
+
+@foreach (var emp in EmployeesList)
+{
+    <p>@emp.Name | @emp.Title</p>
+}
+
+@using BlazorAzureSignalR.Data;
+@using BlazorAzureSignalR.Services;
+@using Microsoft.AspNetCore.SignalR.Client;
+@inject EmployeeService employeeService;
+@inject NavigationManager Navigation
+@code {
+
+    List<Employee> EmployeesList = new List<Employee>();
+
+    List<Employee> EmployeesListRefresh = new List<Employee>();
+
+    private HubConnection? hubConnection;
+    protected readonly string SignalServerUri = "http://localhost:7090/api/";
+
+    protected override async Task OnInitializedAsync()
+    {
+        EmployeesList = await employeeService.GetAllEmployees();
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(SignalServerUri)
+            .Build();
+
+
+        hubConnection.On<List<Employee>>("employeeRefresh", employees =>
+            {
+                EmployeesList = employees;
+                InvokeAsync(StateHasChanged);
+            });
+
+        await hubConnection.StartAsync();
+    }
+}
