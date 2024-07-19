@@ -16,7 +16,14 @@
 
     List<Employee> EmployeesList = new List<Employee>();
 
-    List<Employee> EmployeesListRefresh = new List<Employee>();
+    List<Employee> EmployeesListRefresh123 = new List<Employee>()
+    {
+    new Employee() { Id = 001, Name = "Tom", Title= "Sales"},
+    new Employee() { Id = 004, Name = "Joan", Title= "HR"},
+    new Employee() { Id = 003, Name = "Fred", Title= "Accounting" },
+    };
+
+    List<Employee> EmployeesListRefreshData = new List<Employee>();
 
     private HubConnection? hubConnection;
     protected readonly string SignalServerUri = "http://localhost:7090/api/";
@@ -30,11 +37,11 @@
             .Build();
 
 
-        hubConnection.On<List<Employee>>("employeeRefresh", employees =>
-            {
-                EmployeesList = employees;
-                InvokeAsync(StateHasChanged);
-            });
+        hubConnection.On<string>("employeeRefresh3", employees =>
+        {
+            EmployeesList = EmployeesListRefresh123;
+            InvokeAsync(StateHasChanged);
+        });
 
         await hubConnection.StartAsync();
     }

@@ -35,7 +35,7 @@ namespace AzureTrigger
             log.LogInformation("SQL Changes: " + JsonConvert.SerializeObject(changes));
 
             return signalrMessageForEmployees.AddAsync(new SignalRMessage
-            { Target = "employeeRefresh", Arguments = new[] { changes } });
+            { Target = "employeeRefresh3", Arguments = new[] { "Hi" } });
 
         }
     }
