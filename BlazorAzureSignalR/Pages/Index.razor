@@ -15,34 +15,40 @@
 @code {
 
     List<Employee> EmployeesList = new List<Employee>();
+    List<Employee> EmployeesListRefresh = new List<Employee>();
 
-    List<Employee> EmployeesListRefresh123 = new List<Employee>()
-    {
-    new Employee() { Id = 001, Name = "Tom", Title= "Sales"},
-    new Employee() { Id = 004, Name = "Joan", Title= "HR"},
-    new Employee() { Id = 003, Name = "Fred", Title= "Accounting" },
-    };
 
-    List<Employee> EmployeesListRefreshData = new List<Employee>();
+    // List<Employee> EmployeesListRefresh = new List<Employee>()
+    // {
+    // new Employee() { Id = 001, Name = "Tom", Title= "Sales"},
+    // new Employee() { Id = 004, Name = "Joan", Title= "HR"},
+    // new Employee() { Id = 003, Name = "Fred", Title= "Accounting" },
+    // };
+
 
     private HubConnection? hubConnection;
     protected readonly string SignalServerUri = "http://localhost:7090/api/";
 
     protected override async Task OnInitializedAsync()
     {
-        EmployeesList = await employeeService.GetAllEmployees();
+        EmployeesList =  await employeeService.GetAllEmployees();
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(SignalServerUri)
             .Build();
 
-
-        hubConnection.On<string>("employeeRefresh3", employees =>
+        hubConnection.On<string>("employeeRefresh", async employees =>
         {
-            EmployeesList = EmployeesListRefresh123;
-            InvokeAsync(StateHasChanged);
+            await EmployeesRefresh();
+            EmployeesList = EmployeesListRefresh;
+            StateHasChanged();
         });
 
         await hubConnection.StartAsync();
+    }
+
+    private async Task EmployeesRefresh()
+    {
+        EmployeesListRefresh = await employeeService.GetAllEmployeesRefresh();
     }
 }

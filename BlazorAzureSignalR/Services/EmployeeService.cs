@@ -11,5 +11,10 @@ namespace BlazorAzureSignalR.Services
         {
             return await dbContext.Employee.AsNoTracking().ToListAsync();
         }
+
+        public async Task<List<Employee>> GetAllEmployeesRefresh()
+        {
+            return await dbContext.Employee.AsNoTracking().ToListAsync();
+        }
     }
 }
