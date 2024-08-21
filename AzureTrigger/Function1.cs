@@ -9,6 +9,8 @@ using Microsoft.Azure.WebJobs.Extensions.Sql;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.IO;
+using System.Threading.Channels;
 
 
 namespace AzureTrigger
@@ -26,16 +28,33 @@ namespace AzureTrigger
         }
 
         //Azure SQL Trigger function
-        [FunctionName("EmployeesHub")]
-        public static Task Run(
-                [SqlTrigger("[dbo].[Employee]", "DbConnection")] IReadOnlyList<SqlChange<ToDoItem>> changes,
-                [SignalR(HubName = "EmployeesHub")] IAsyncCollector<SignalRMessage> signalrMessageForEmployees,
-                ILogger log)
-        {
-            log.LogInformation("SQL Changes: " + JsonConvert.SerializeObject(changes));
+        //[FunctionName("EmployeesHub")]
+        //public static Task Run(
+        //        [SqlTrigger("[dbo].[Employee]", "DbConnection")] IReadOnlyList<SqlChange<ToDoItem>> changes,
+        //        [SignalR(HubName = "EmployeesHub")] IAsyncCollector<SignalRMessage> signalrMessageForEmployees,
+        //        ILogger log)
+        //{
+        //    log.LogInformation("SQL Changes: " + JsonConvert.SerializeObject(changes));
 
-            return signalrMessageForEmployees.AddAsync(new SignalRMessage
+        //    return signalrMessageForEmployees.AddAsync(new SignalRMessage
+        //    { Target = "employeeRefresh", Arguments = new[] { "Hi" } });
+
+        //}
+
+
+        [FunctionName("EmployeesHub")]
+        public static async Task<IActionResult>Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            [SignalR(HubName = "EmployeesHub")] IAsyncCollector<SignalRMessage> signalrMessageForEmployees,
+            ILogger log)
+        {
+            log.LogInformation("Azure function Triggered");
+
+            await signalrMessageForEmployees.AddAsync(new SignalRMessage
             { Target = "employeeRefresh", Arguments = new[] { "Hi" } });
+
+            (string firstName, string lastName) = ("Sudheer", "Bets");
+            return new OkObjectResult(new { firstName, lastName });
 
         }
     }

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorAzureSignalR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240722063355_onit")]
+    [Migration("20240723054625_onit")]
     partial class onit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

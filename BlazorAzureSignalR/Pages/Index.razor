@@ -2,6 +2,8 @@
 
 <PageTitle>Live Data</PageTitle>
 
+<p role="status">Number of times message received from SignalR service : <span style="font-weight: bold;">@currentCount </span></p>
+
 @foreach (var emp in EmployeesList)
 {
     <p>@emp.Name | @emp.Title</p>
@@ -27,7 +29,7 @@
 
 
     private HubConnection? hubConnection;
-    protected readonly string SignalServerUri = "http://localhost:7090/api/";
+    protected readonly string SignalServerUri = "https://azuretrigger20240817184133.azurewebsites.net/api/";
 
     protected override async Task OnInitializedAsync()
     {
@@ -35,12 +37,14 @@
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(SignalServerUri)
+            .WithAutomaticReconnect()
             .Build();
 
         hubConnection.On<string>("employeeRefresh", async employees =>
         {
             await EmployeesRefresh();
             EmployeesList = EmployeesListRefresh;
+            IncrementCount();
             StateHasChanged();
         });
 
@@ -50,5 +54,12 @@
     private async Task EmployeesRefresh()
     {
         EmployeesListRefresh = await employeeService.GetAllEmployeesRefresh();
+    }
+
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
     }
 }
