@@ -50,8 +50,12 @@ namespace AzureTrigger
         {
             log.LogInformation("Azure function Triggered");
 
+            string name = req.Query["name"];
+
+            string title = req.Query["title"];
+
             await signalrMessageForEmployees.AddAsync(new SignalRMessage
-            { Target = "employeeRefresh", Arguments = new[] { "Hi" } });
+            { Target = "employeeRefresh", Arguments = new[] { name + "|" + title } });
 
             (string firstName, string lastName) = ("Sudheer", "Bets");
             return new OkObjectResult(new { firstName, lastName });
