@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading.Channels;
+using System.Linq;
 
 
 namespace AzureTrigger
@@ -43,7 +44,7 @@ namespace AzureTrigger
 
 
         [FunctionName("EmployeesHub")]
-        public static async Task<IActionResult>Run(
+        public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             [SignalR(HubName = "EmployeesHub")] IAsyncCollector<SignalRMessage> signalrMessageForEmployees,
             ILogger log)
@@ -54,19 +55,36 @@ namespace AzureTrigger
 
             string title = req.Query["title"];
 
-            await signalrMessageForEmployees.AddAsync(new SignalRMessage
-            { Target = "employeeRefresh", Arguments = new[] { name + "|" + title } });
+            string lanIds = req.Query["lanIds"];
+            string[] lanIdsArray = lanIds.Split("|");
+
+            foreach (string lanId in lanIdsArray)
+            {
+                await signalrMessageForEmployees.AddAsync(new SignalRMessage
+                {
+                    Target = lanId,
+                    Arguments = new[] { name + "|" + title }
+                });
+            }
+
+            if (lanIdsArray.Count() == 0)
+            {
+                await signalrMessageForEmployees.AddAsync(new SignalRMessage
+                {
+                    Target = "all",
+                    Arguments = new[] { name + "|" + title }
+                });
+            }
 
             (string firstName, string lastName) = ("Sudheer", "Bets");
             return new OkObjectResult(new { firstName, lastName });
-
         }
-    }
 
-    public class ToDoItem
-    {
-        public string Id { get; set; }
-        public int Priority { get; set; }
-        public string Description { get; set; }
+        public class ToDoItem
+        {
+            public string Id { get; set; }
+            public int Priority { get; set; }
+            public string Description { get; set; }
+        }
     }
 }

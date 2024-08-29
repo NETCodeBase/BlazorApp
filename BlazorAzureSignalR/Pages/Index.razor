@@ -40,7 +40,22 @@
             .WithAutomaticReconnect()
             .Build();
 
-        hubConnection.On<string>("employeeRefresh", async employees =>
+        hubConnection.On<string>("lanId123", async employees =>
+        {
+            // await EmployeesRefresh();
+            // EmployeesList = EmployeesListRefresh;
+            string[] value_split = employees.Split("|");
+            Employee employee = new Employee
+            {
+                Name = value_split[0],
+                Title = value_split[1]
+            };
+            EmployeesList.Add(employee);
+            IncrementCount();
+            StateHasChanged();
+        });
+
+        hubConnection.On<string>("all", async employees =>
         {
             // await EmployeesRefresh();
             // EmployeesList = EmployeesListRefresh;
